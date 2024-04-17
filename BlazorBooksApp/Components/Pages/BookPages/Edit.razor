@@ -1,0 +1,87 @@
+﻿@page "/Books/edit"
+@inject BlazorBooksApp.BooksService BooksService
+@using BlazorBooksApp
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4>Book</h4>
+<hr />
+@if (BookData is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="BookData" OnValidSubmit="UpdateBook" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="Book.Id" value="@BookData.Id" />
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <InputText id="title" @bind-Value="BookData.Title" class="form-control" />
+                    <ValidationMessage For="() => BookData.Title" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="isbn" class="form-label">ISBN:</label>
+                    <InputNumber id="isbn" @bind-Value="BookData.ISBN" class="form-control" />
+                    <ValidationMessage For="() => BookData.ISBN" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="author" class="form-label">Author:</label>
+                    <InputText id="author" @bind-Value="BookData.Author" class="form-control" />
+                    <ValidationMessage For="() => BookData.Author" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/books">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public Guid Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public BookDTO BookData { get; set; } = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dbBook = await BooksService.GetBook(Id);
+
+        if (dbBook is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+
+        BookData.Title = dbBook.Title;
+        BookData.ISBN = dbBook.ISBN;
+        BookData.Author = dbBook.Author;
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateBook()
+    {
+        Console.WriteLine(BookData.Author);
+
+        await BooksService.Update(new BlazorBooksApp.Book
+        {
+            Id = Id,
+            Title = BookData.Title,
+            ISBN = BookData.ISBN,
+            Author = BookData.Author,
+        });
+
+        NavigationManager.NavigateTo("/books");
+    }
+}

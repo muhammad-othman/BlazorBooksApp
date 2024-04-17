@@ -1,12 +1,15 @@
 ﻿using BlazorBooksApp.Components;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using BlazorBooksApp.Data;
+using BlazorBooksApp;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<BlazorBooksAppContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BlazorBooksAppContext") ?? throw new InvalidOperationException("Connection string 'BlazorBooksAppContext' not found.")));
 
+builder.Services.AddAWSService<IAmazonDynamoDB>();
+builder.Services.AddSingleton<DynamoDBContext>();
+
+
+builder.Services.AddScoped<BooksService>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

@@ -1,0 +1,74 @@
+﻿@page "/books/create"
+@inject BlazorBooksApp.BooksService BooksService
+@using BlazorBooksApp
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4>Book</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Book" OnValidSubmit="AddBook" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label> 
+                <InputText id="title" @bind-Value="Book.Title" class="form-control" /> 
+                <ValidationMessage For="() => Book.Title" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="isbn" class="form-label">ISBN:</label> 
+                <InputNumber id="isbn" @bind-Value="Book.ISBN" class="form-control" /> 
+                <ValidationMessage For="() => Book.ISBN" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="author" class="form-label">Author:</label> 
+                <InputText id="author" @bind-Value="Book.Author" class="form-control" /> 
+                <ValidationMessage For="() => Book.Author" class="text-danger" /> 
+            </div>
+            <div class="mb-3">
+                <label for="author" class="form-label">Upload Book:</label>
+                <InputFile OnChange="@LoadFile" />
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/books">Back to List</a>
+</div>
+
+
+
+
+@code {
+    public Guid inputFileId = Guid.NewGuid();
+    private void LoadFile(InputFileChangeEventArgs e)
+    {
+        FileArgs = e;
+    }
+
+    [SupplyParameterFromForm]
+    public BookDTO Book { get; set; } = new();
+
+    public InputFileChangeEventArgs FileArgs { get; set; }
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddBook()
+    {
+
+        await BooksService.CreateBook(new BlazorBooksApp.Book
+            {
+                Title = Book.Title,
+                ISBN = Book.ISBN,
+                Author = Book.Author,
+            }, FileArgs.File);
+        NavigationManager.NavigateTo("/books");
+    }
+}

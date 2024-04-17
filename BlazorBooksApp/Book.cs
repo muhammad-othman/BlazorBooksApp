@@ -2,18 +2,31 @@
 
 namespace BlazorBooksApp
 {
-    [DynamoDBTable("Book")]
+    [DynamoDBTable("BooksDataTable")]
     public class Book
     {
         [DynamoDBHashKey]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Title { get; set; }
         public int ISBN { get; set; }
 
-        [DynamoDBProperty("Authors")]
-        public List<string> BookAuthors { get; set; }
+        public string Author { get; set; }
 
+        [DynamoDBIgnore]
         public string DownloadLink { get; set; }
+
+        public S3Link? S3Link { get; set; }
+    }
+
+
+    public class BookDTO
+    {
+        public Guid Id { get; set; }
+
+        public string Title { get; set; }
+        public int ISBN { get; set; }
+
+        public string Author { get; set; }
     }
 }

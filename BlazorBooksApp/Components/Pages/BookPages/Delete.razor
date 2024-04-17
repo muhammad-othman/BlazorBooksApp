@@ -1,0 +1,63 @@
+﻿@page "/books/delete"
+@inject BlazorBooksApp.BooksService BooksService
+@using BlazorBooksApp
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Book</h4>
+    <hr />
+    @if (book is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@book.Title</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">ISBN</dt>
+            <dd class="col-sm-10">@book.ISBN</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BookAuthors</dt>
+            <dd class="col-sm-10">@book.Author</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DownloadLink</dt>
+            <dd class="col-sm-10">@book.DownloadLink</dd>
+        </dl>
+        <EditForm method="post" Model="book" OnValidSubmit="DeleteBook" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(book is null)">Delete</button> |
+            <a href="/books">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    Book? book;
+
+    [SupplyParameterFromQuery]
+    public Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await BooksService.GetBook(Id);
+
+        if (book is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteBook()
+    {
+        await BooksService.Delete(book);
+        NavigationManager.NavigateTo("/books");
+    }
+}
